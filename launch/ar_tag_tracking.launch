@@ -1,0 +1,45 @@
+<launch>
+
+  <!-- argument list -->
+  <arg name="rviz_enable" default="true"/>
+  <arg name="ar_launch_file" default="pr2_indiv_no_kinect.launch"/>
+  <arg name="cam_info_topic" default="/webcam/camera_info"/>
+  <arg name="cam_image_topic" default="/webcam/image_raw"/>
+  <arg name="camera_frame" default="webcam"/>
+  <arg name="marker_size" default="6.65"/>
+
+  <arg name="robot_base_link" default="robot_target_link"/>
+  <arg name="robot_tag_link" default="ar_marker_3"/>
+  <arg name="manipulator_base_link" default="manipulator_base_link"/>
+  <arg name="manipulator_tag_link" default="ar_marker_0"/>
+
+  <!-- launch cero2_realsense -->	
+  <include file="$(find ar_tag_tracking)/launch/webcam.launch">
+    <arg name="camera_frame" value="$(arg camera_frame)"/>
+  </include>  
+
+  <!-- launch ar2_track_alvar -->	
+  <include file="$(find ar_track_alvar)/launch/$(arg ar_launch_file)">
+    <arg name="cam_info_topic" value="$(arg cam_info_topic)"/>
+    <arg name="cam_image_topic" value="$(arg cam_image_topic)"/>
+    <arg name="output_frame" value="$(arg camera_frame)"/>
+    <arg name="marker_size" value="$(arg marker_size)"/>
+  </include>
+
+  <!-- harded coded transforms -->
+  <node pkg="tf" type="static_transform_publisher" name="world_to_camera_broadcaster" args="0 0 3 1 0 0 0 world $(arg camera_frame) 100" />
+  <node pkg="tf" type="static_transform_publisher" name="manipulator_base_to_manipulator_tag_broadcaster" args="0 0.185 0.04 0 0 0 1 $(arg manipulator_tag_link) $(arg manipulator_base_link) 100" />
+  <node pkg="tf" type="static_transform_publisher" name="robot_base_to_robot_tag_broadcaster" args="0 0.095 0.045 0 0 0 1 $(arg robot_tag_link) $(arg robot_base_link) 100" />
+
+   <!-- start ar tag tracking and target pose calculation -->
+  <node name="ar_tag_tracking" pkg="ar_tag_tracking" type="ar_tag_tracking_node" output="screen">
+    <param name="robot_tag_link" type="string" value="$(arg robot_tag_link)"/>
+    <param name="manipulator_tag_link" type="string" value="$(arg manipulator_tag_link)"/>
+  </node>
+
+  <!-- start virtualization and select rviz configuration based on slam method -->
+  <group if="$(arg rviz_enable)">
+    <node name="rviz" pkg="rviz" type="rviz" required="true" args="-d $(find ar_tag_tracking)/rviz/ar_tag_tracking.rviz" />
+  </group>
+
+</launch>

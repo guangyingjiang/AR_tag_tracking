@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>ar_tag_tracking</name>
+  <version>0.13.0</version>
+  <description>ar_tag_tracking</description>
+  <maintainer email="guangying.jiang@bshg.com">jiang</maintainer>
+  <license>BOSCH</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <!-- Ros -->
+  <depend>ar_track_alvar</depend>
+  <depend>usb_cam</depend>
+  <depend>geometry_msgs</depend>  
+  <depend>tf</depend>
+  <depend>roscpp</depend>
+
+  <export>
+
+  </export>
+</package>
